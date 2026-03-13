@@ -122,12 +122,22 @@ def resume_page():
     try:
         with open(RESUME_FILE, "rb") as f:
             b64 = base64.b64encode(f.read()).decode()
-        st.markdown(
-            f'<meta http-equiv="refresh" content="3;url=/">'
-            f'<a id="dl" href="data:application/pdf;base64,{b64}" '
-            f'download="Jeron_Wong_Resume.pdf">Click here if download does not start</a>'
-            f'<script>document.getElementById("dl").click();</script>',
-            unsafe_allow_html=True,
+        st.html(
+            f"""
+            <html><body>
+            <a id="dl" href="data:application/pdf;base64,{b64}"
+               download="Jeron_Wong_Resume.pdf"
+               style="color:#4FC3F7;font-size:1.1rem">
+               Click here if download does not start
+            </a>
+            <script>
+                document.getElementById("dl").click();
+                setTimeout(function() {{
+                    window.parent.location.href = "/";
+                }}, 3000);
+            </script>
+            </body></html>
+            """
         )
     except FileNotFoundError:
         st.error("Resume file not found.")
