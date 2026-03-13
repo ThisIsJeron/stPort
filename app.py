@@ -54,6 +54,13 @@ SHARED_CSS = """
         font-size: 0.85rem;
         color: #E6EDF3;
     }
+    .badge-link {
+        text-decoration: none;
+    }
+    .badge-link:hover .badge {
+        border-color: #4FC3F7;
+        color: #4FC3F7;
+    }
     .hero-name {
         font-size: 3.5rem !important;
         font-weight: 700 !important;
@@ -156,17 +163,56 @@ def main_page():
     st.markdown("## Skills")
 
     skill_categories = {
-        "Languages": ["Python", "Go", "Rust"],
-        "Tools & Infrastructure": ["Docker", "Kubernetes", "Terraform", "Helm", "GitHub Actions"],
-        "Cloud & Monitoring": ["AWS", "Azure", "Datadog", "Linux"],
+        "Programming Languages": [
+            ("Python", "https://www.python.org/"),
+            ("Go", "https://go.dev/"),
+            ("Rust", "https://www.rust-lang.org/"),
+        ],
+        "Tools & Libraries": [
+            ("Docker", "https://www.docker.com/"),
+            ("Kubernetes", "https://kubernetes.io/"),
+            ("Terraform", "https://www.terraform.io/"),
+            ("Helm", "https://helm.sh/"),
+            ("Prometheus", "https://prometheus.io/"),
+            ("Grafana", "https://grafana.com/"),
+            ("InfluxDB", "https://www.influxdata.com/"),
+        ],
+        "AI/ML Infrastructure": [
+            ("AWS Bedrock", "https://aws.amazon.com/bedrock/"),
+            ("SageMaker", "https://aws.amazon.com/sagemaker/"),
+            ("RAG Pipelines", None),
+            ("ElevenLabs", "https://elevenlabs.io/"),
+            ("OpenAI API", "https://platform.openai.com/"),
+        ],
+        "Environments & Services": [
+            ("AWS", "https://aws.amazon.com/"),
+            ("Azure", "https://azure.microsoft.com/"),
+            ("GitHub", "https://github.com/"),
+            ("Linux", "https://www.kernel.org/"),
+            ("Datadog", "https://www.datadoghq.com/"),
+        ],
+        "World Languages": [
+            ("English", None),
+            ("Mandarin Chinese", None),
+        ],
     }
 
-    scols = st.columns(3)
-    for i, (category, skills) in enumerate(skill_categories.items()):
-        with scols[i]:
-            st.markdown(f"**{category}**")
-            badges = "".join(f'<span class="badge">{s}</span>' for s in skills)
-            st.markdown(badges, unsafe_allow_html=True)
+    skills_html = '<div class="card-grid" style="grid-template-columns: repeat(5, 1fr);">'
+    for category, skills in skill_categories.items():
+        badges = ""
+        for skill in skills:
+            name, url = skill
+            if url:
+                badges += f'<a href="{url}" target="_blank" class="badge-link"><span class="badge">{name}</span></a>'
+            else:
+                badges += f'<span class="badge">{name}</span>'
+        skills_html += f"""
+<div>
+    <strong>{category}</strong><br><br>
+    {badges}
+</div>"""
+    skills_html += "</div>"
+    st.markdown(skills_html, unsafe_allow_html=True)
 
     st.divider()
 
