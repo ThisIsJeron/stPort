@@ -348,10 +348,12 @@ def main_page():
             ("Prometheus", "https://prometheus.io/"),
             ("Grafana", "https://grafana.com/"),
             ("InfluxDB", "https://www.influxdata.com/"),
+            ("Proxmox VE", "https://www.proxmox.com/"),
         ],
         "AI/ML Infrastructure": [
             ("AWS Bedrock", "https://aws.amazon.com/bedrock/"),
             ("SageMaker", "https://aws.amazon.com/sagemaker/"),
+            ("OpenClaw", "https://github.com/openclaw/openclaw"),
             ("RAG Pipelines", None),
             ("ElevenLabs", "https://elevenlabs.io/"),
             ("OpenAI API", "https://platform.openai.com/"),
@@ -362,6 +364,7 @@ def main_page():
             ("GitHub", "https://github.com/"),
             ("Linux", "https://www.kernel.org/"),
             ("Datadog", "https://www.datadoghq.com/"),
+            ("Proxmox", "https://www.proxmox.com/"),
         ],
         "World Languages": [
             ("English", None),
@@ -399,9 +402,11 @@ def main_page():
 
     st.markdown("## About")
     st.markdown(
-        "DevOps / Platform Engineer with experience building and scaling CI/CD pipelines, cloud infrastructure, "
-        "and developer tooling across startups and enterprise. Passionate about automation, observability, "
-        "and shipping reliable systems."
+        "DevOps / Platform Engineer with nearly a decade of experience building and scaling CI/CD pipelines, "
+        "cloud infrastructure, and developer tooling — from early-stage startups to industry-leading enterprises "
+        "like Synopsys, and companies in between. Homelab enthusiast and former maintainer of Proxmox VE Helper "
+        "Scripts, with years of hands-on self-hosting experience. Currently building production agentic workflows "
+        "with OpenClaw and shipping reliable, observable systems at scale."
     )
 
     st.divider()
