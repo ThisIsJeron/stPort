@@ -244,23 +244,69 @@ st.divider()
 
 st.markdown("## Projects & Awards")
 
-pcol1, pcol2 = st.columns(2)
-with pcol1:
-    st.markdown("""
+hackathon_projects = [
+    {
+        "name": "FluffyDuck — Restaurant AI Agent",
+        "award": "Finalist · ElevenLabs Worldwide Hackathon",
+        "desc": "Multi-channel AI agent system for restaurant marketing using ElevenLabs, fal.ai, and Supabase. Autonomous agents spanning social, email, and phone channels.",
+        "winner": True,
+    },
+    {
+        "name": "LINC — LGBTQ In Need of Chatbot",
+        "award": "Winner · Best Conversational AI · MHacks 11",
+        "desc": "Conversational AI chatbot providing support for LGBTQ individuals via SMS and voice calls. Built with Clinc AI, Twilio, and Google Cloud Platform.",
+        "winner": True,
+    },
+    {
+        "name": "BasicSloth — Encrypted Radio Comms",
+        "award": "Winner · Innovative Use of Speech · YHack 2015",
+        "desc": "Encrypted communications over software-defined radio with speech-to-text integration. PGP encryption via GnuRadio and Nuance speech API.",
+        "winner": True,
+    },
+    {
+        "name": "ToneFolio — Stock Sentiment Analyzer",
+        "award": "Winner · BlackRock Challenge · Cal Hacks 3.0",
+        "desc": "Predicts if your stock portfolio is bullish or bearish using IBM Watson Tone Analyzer on financial news, integrated with BlackRock's Aladdin API.",
+        "winner": True,
+    },
+    {
+        "name": "CEEDR — Energy Data Visualization",
+        "award": "Winner · Best Use of OSISoft API · HackDavis 2017",
+        "desc": "Visualized and predicted UC Davis energy consumption patterns with R/Shiny dashboards and an Amazon Alexa skill for voice-activated data queries.",
+        "winner": True,
+    },
+    {
+        "name": "Emoji Pasta Generator",
+        "award": "Winner",
+        "desc": "Text transformation tool for generating emoji-enriched content.",
+        "winner": True,
+    },
+    {
+        "name": "SummaryGPT — Twitter Bot",
+        "award": "10,000+ uses in first month",
+        "desc": "Twitter bot leveraging OpenAI API on GCP. When mentioned, replies with an AI-generated summary of the referenced tweet thread.",
+        "winner": False,
+    },
+]
+
+for row_start in range(0, len(hackathon_projects), 3):
+    cols = st.columns(3)
+    for j, col in enumerate(cols):
+        idx = row_start + j
+        if idx >= len(hackathon_projects):
+            break
+        proj = hackathon_projects[idx]
+        icon = "🏆" if proj["winner"] else "🤖"
+        with col:
+            st.markdown(f"""
 <div class="card">
-    <strong>🏆 ElevenLabs Worldwide Hackathon — FluffyDuck Restaurant AI · Finalist</strong><br><br>
-    Architected a multi-channel AI agent system for restaurant marketing using ElevenLabs, fal.ai, and Supabase.
-    Engineered autonomous agents spanning social, email, and phone channels.
+    <strong>{icon} {proj['name']}</strong><br>
+    <small style="color:#4FC3F7">{proj['award']}</small><br><br>
+    {proj['desc']}
 </div>
 """, unsafe_allow_html=True)
-with pcol2:
-    st.markdown("""
-<div class="card">
-    <strong>🤖 SummaryGPT — Twitter Bot</strong><br><br>
-    Built Twitter bot that generated 10,000+ uses in its first month, leveraging the OpenAI API and Twitter API on GCP.
-    Delivered on-demand tweet summarization — when mentioned, the bot replied with an AI-generated summary.
-</div>
-""", unsafe_allow_html=True)
+
+st.link_button("View all projects on Devpost", "https://devpost.com/ThisIsJeron")
 
 st.divider()
 
