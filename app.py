@@ -129,7 +129,7 @@ def resume_page():
         )
     except FileNotFoundError:
         st.error("Resume file not found.")
-    st.page_link("app.py", label="← Back to portfolio")
+    st.link_button("← Back to portfolio", "/")
 
 
 # ── Main Portfolio Page ──────────────────────────────────────────────────────
