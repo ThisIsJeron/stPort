@@ -93,36 +93,21 @@ SHARED_CSS = """
 
 # ── Section Navigation (sidebar) ─────────────────────────────────────────────
 
-NAV_SECTIONS = [
-    ("Skills", "Skills"),
-    ("About", "About"),
-    ("Experience", "Experience"),
-    ("GitHub Repos", "GitHub Repos"),
-    ("GitHub Activity", "GitHub Activity"),
-    ("Projects & Awards", "Projects & Awards"),
-    ("Education", "Education"),
-    ("Contact", "Contact"),
-]
-
-SCROLL_JS_TEMPLATE = """
-<script>
-(function() {{
-    const target = "{section_text}";
-    const mainDoc = window.parent.document;
-    const headers = mainDoc.querySelectorAll('h2, h1');
-    for (const h of headers) {{
-        if (h.textContent.trim() === target) {{
-            h.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
-            break;
-        }}
-    }}
-}})();
-</script>
+SIDEBAR_NAV_MD = """
+### Navigate
+- [Skills](#skills)
+- [About](#about)
+- [Experience](#experience)
+- [GitHub Repos](#github-repos)
+- [GitHub Activity](#github-activity)
+- [Projects & Awards](#projects-awards)
+- [Education](#education)
+- [Resume](#resume)
 """
 
 # ── Lottie Helper ────────────────────────────────────────────────────────────
 
-LOTTIE_CODING_URL = "https://assets2.lottiefiles.com/packages/lf20_fcfjwiyb.json"
+LOTTIE_CODING_URL = "https://assets9.lottiefiles.com/packages/lf20_w51pcehl.json"
 
 
 @st.cache_data(ttl=86400)
@@ -319,10 +304,7 @@ def main_page():
 
     # ── Sidebar Navigation ───────────────────────────────────────────────────
     with st.sidebar:
-        st.markdown("### Navigate")
-        for label, section_text in NAV_SECTIONS:
-            if st.button(label, key=f"nav_{label}", use_container_width=True):
-                st.html(SCROLL_JS_TEMPLATE.format(section_text=section_text))
+        st.markdown(SIDEBAR_NAV_MD)
 
     profile, top_repos = fetch_github_data()
 
@@ -338,11 +320,13 @@ def main_page():
         with lottie_col:
             st_lottie(lottie_data, height=120, key="hero_lottie")
 
-    _, link_col1, link_col2, _ = st.columns([2, 1, 1, 2])
+    _, link_col1, link_col2, link_col3, _ = st.columns([2, 1, 1, 1, 2])
     with link_col1:
         st.link_button("GitHub", f"https://github.com/{GITHUB_USERNAME}", use_container_width=True)
     with link_col2:
         st.link_button("LinkedIn", "https://www.linkedin.com/in/jeronw/", use_container_width=True)
+    with link_col3:
+        st.link_button("Blog", "https://blog.weew.ee", use_container_width=True)
 
     st.divider()
 
@@ -564,39 +548,7 @@ def main_page():
 
     st.divider()
 
-    # ── 8. Contact ───────────────────────────────────────────────────────────
-
-    st.markdown("## Contact")
-
-    ccol1, ccol2, ccol3 = st.columns(3)
-    with ccol1:
-        st.markdown("""
-<div class="card">
-    <strong>LinkedIn</strong><br>
-    <small style="color:#8B949E">Connect with me</small>
-</div>
-""", unsafe_allow_html=True)
-        st.link_button("Open LinkedIn", "https://www.linkedin.com/in/jeronw/", use_container_width=True)
-    with ccol2:
-        st.markdown("""
-<div class="card">
-    <strong>GitHub</strong><br>
-    <small style="color:#8B949E">Check out my code</small>
-</div>
-""", unsafe_allow_html=True)
-        st.link_button("Open GitHub", f"https://github.com/{GITHUB_USERNAME}", use_container_width=True)
-    with ccol3:
-        st.markdown("""
-<div class="card">
-    <strong>Email</strong><br>
-    <small style="color:#8B949E">jeronwong@gmail.com</small>
-</div>
-""", unsafe_allow_html=True)
-        st.link_button("Send Email", "mailto:jeronwong@gmail.com", use_container_width=True)
-
-    st.divider()
-
-    # ── 9. Resume Download ───────────────────────────────────────────────────
+    # ── 8. Resume Download ───────────────────────────────────────────────────
 
     st.markdown("## Resume")
 
