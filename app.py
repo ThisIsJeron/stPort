@@ -1,13 +1,35 @@
+import base64
+
 import streamlit as st
 import requests
+
+RESUME_FILE = "Jeron Wong Resume 2026-3.pdf"
 
 # ── Page Config ──────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="Jeron Wong | DevOps Engineer",
+    page_title="Jeron Wong | Sr. DevOps Engineer",
     page_icon="💻",
     layout="wide",
 )
+
+# ── /resume route — auto-download PDF ────────────────────────────────────────
+
+if "resume" in st.query_params:
+    st.markdown("## Downloading Resume...")
+    try:
+        with open(RESUME_FILE, "rb") as f:
+            b64 = base64.b64encode(f.read()).decode()
+        st.markdown(
+            f'<meta http-equiv="refresh" content="2;url=/">'
+            f'<a id="dl" href="data:application/pdf;base64,{b64}" '
+            f'download="Jeron_Wong_Resume.pdf">Click here if download does not start</a>'
+            f'<script>document.getElementById("dl").click();</script>',
+            unsafe_allow_html=True,
+        )
+    except FileNotFoundError:
+        st.error("Resume file not found.")
+    st.stop()
 
 # ── Custom CSS ───────────────────────────────────────────────────────────────
 
@@ -31,15 +53,22 @@ st.markdown("""
         font-size: 0.85rem;
         color: #E6EDF3;
     }
-    .metric-card {
-        background-color: #161B22;
-        border: 1px solid #30363D;
-        border-radius: 10px;
-        padding: 1rem;
+    .hero-name {
+        font-size: 3.5rem;
+        font-weight: 700;
         text-align: center;
+        margin-bottom: 0;
     }
-    .metric-card h2 { color: #4FC3F7; margin: 0; }
-    .metric-card p { color: #8B949E; margin: 0; }
+    .hero-subtitle {
+        font-size: 1.3rem;
+        text-align: center;
+        color: #8B949E;
+        margin-top: 0;
+    }
+    .hero-location {
+        text-align: center;
+        color: #8B949E;
+    }
     .timeline-item {
         border-left: 2px solid #4FC3F7;
         padding-left: 1.2rem;
@@ -84,114 +113,26 @@ profile, top_repos = fetch_github_data()
 
 # ── 1. Hero ──────────────────────────────────────────────────────────────────
 
-col1, col2 = st.columns([3, 1])
-with col1:
-    st.markdown("# Jeron Wong")
-    st.markdown("### DevOps Engineer")
-    st.markdown("📍 New York, NY")
-    link_col1, link_col2, _ = st.columns([1, 1, 3])
-    with link_col1:
-        st.link_button("GitHub", f"https://github.com/{GITHUB_USERNAME}")
-    with link_col2:
-        st.link_button("LinkedIn", "https://www.linkedin.com/in/jeronwong/")
-with col2:
-    if profile and profile.get("avatar_url"):
-        st.image(profile["avatar_url"], width=180)
+st.markdown('<p class="hero-name">Jeron Wong</p>', unsafe_allow_html=True)
+st.markdown('<p class="hero-subtitle">Senior DevOps Engineer</p>', unsafe_allow_html=True)
+st.markdown('<p class="hero-location">Berkeley, CA</p>', unsafe_allow_html=True)
+
+_, link_col1, link_col2, _ = st.columns([2, 1, 1, 2])
+with link_col1:
+    st.link_button("GitHub", f"https://github.com/{GITHUB_USERNAME}", use_container_width=True)
+with link_col2:
+    st.link_button("LinkedIn", "https://www.linkedin.com/in/jeronw/", use_container_width=True)
 
 st.divider()
 
-# ── 2. About ─────────────────────────────────────────────────────────────────
-
-st.markdown("## About")
-st.markdown(
-    "DevOps Engineer with experience building and scaling CI/CD pipelines, cloud infrastructure, "
-    "and developer tooling across startups and enterprise. Passionate about automation, observability, "
-    "and shipping reliable systems."
-)
-
-mcol1, mcol2, mcol3 = st.columns(3)
-public_repos = profile.get("public_repos", "—") if profile else "—"
-followers = profile.get("followers", "—") if profile else "—"
-top_stars = top_repos[0].get("stargazers_count", "—") if top_repos else "—"
-
-with mcol1:
-    st.markdown(f'<div class="metric-card"><h2>{public_repos}</h2><p>Public Repos</p></div>', unsafe_allow_html=True)
-with mcol2:
-    st.markdown(f'<div class="metric-card"><h2>⭐ {top_stars}</h2><p>Top Repo Stars</p></div>', unsafe_allow_html=True)
-with mcol3:
-    st.markdown(f'<div class="metric-card"><h2>{followers}</h2><p>Followers</p></div>', unsafe_allow_html=True)
-
-st.divider()
-
-# ── 3. Experience ─────────────────────────────────────────────────────────────
-
-st.markdown("## Experience")
-
-experiences = [
-    {
-        "title": "DevOps Engineer",
-        "company": "Reality Defender",
-        "date": "Oct 2024 – Present",
-        "location": "New York, NY",
-        "bullets": [
-            "Architected CI/CD pipelines with GitHub Actions, Docker, and Helm for Kubernetes deployments",
-            "Managed AWS infrastructure with Terraform, improving deployment reliability and reducing provisioning time",
-            "Implemented monitoring and alerting with Datadog, increasing system observability across production services",
-        ],
-    },
-    {
-        "title": "DevOps Engineer",
-        "company": "Capital Rx",
-        "date": "Jan 2023 – Oct 2024",
-        "location": "New York, NY",
-        "bullets": [
-            "Built and maintained CI/CD pipelines using Azure DevOps and GitHub Actions for microservices architecture",
-            "Automated infrastructure provisioning with Terraform across Azure cloud environments",
-            "Developed internal CLI tooling in Go to streamline developer workflows and reduce onboarding time",
-        ],
-    },
-    {
-        "title": "DevOps Engineer",
-        "company": "Synopsys",
-        "date": "Jun 2021 – Jan 2023",
-        "location": "Mountain View, CA",
-        "bullets": [
-            "Managed Kubernetes clusters and Helm charts for production workloads",
-            "Implemented infrastructure-as-code practices with Terraform and Ansible",
-            "Built automated testing and deployment pipelines reducing release cycle time",
-        ],
-    },
-    {
-        "title": "Software Engineer Intern",
-        "company": "HouseKeys",
-        "date": "Jun 2020 – Aug 2020",
-        "location": "San Jose, CA",
-        "bullets": [
-            "Developed full-stack features using Python and React for affordable housing platform",
-            "Integrated third-party APIs and improved application performance",
-        ],
-    },
-]
-
-for exp in experiences:
-    st.markdown(f"""
-<div class="timeline-item">
-    <strong>{exp['title']}</strong> · {exp['company']}<br>
-    <small style="color:#8B949E">{exp['date']} · {exp['location']}</small>
-    <ul>{"".join(f"<li>{b}</li>" for b in exp['bullets'])}</ul>
-</div>
-""", unsafe_allow_html=True)
-
-st.divider()
-
-# ── 4. Skills ─────────────────────────────────────────────────────────────────
+# ── 2. Skills ─────────────────────────────────────────────────────────────────
 
 st.markdown("## Skills")
 
 skill_categories = {
-    "Languages": ["Python", "Go", "Rust", "Bash", "SQL"],
-    "Infrastructure": ["Docker", "Kubernetes", "Terraform", "Helm", "Ansible", "GitHub Actions"],
-    "Cloud & Monitoring": ["AWS", "Azure", "Datadog", "Linux", "Nginx", "PostgreSQL"],
+    "Languages": ["Python", "Go", "Rust"],
+    "Tools & Infrastructure": ["Docker", "Kubernetes", "Terraform", "Helm", "GitHub Actions"],
+    "Cloud & Monitoring": ["AWS", "Azure", "Datadog", "Linux"],
 }
 
 scols = st.columns(3)
@@ -200,6 +141,72 @@ for i, (category, skills) in enumerate(skill_categories.items()):
         st.markdown(f"**{category}**")
         badges = "".join(f'<span class="badge">{s}</span>' for s in skills)
         st.markdown(badges, unsafe_allow_html=True)
+
+st.divider()
+
+# ── 3. About ─────────────────────────────────────────────────────────────────
+
+st.markdown("## About")
+st.markdown(
+    "Senior DevOps Engineer with experience building and scaling CI/CD pipelines, cloud infrastructure, "
+    "and developer tooling across startups and enterprise. Passionate about automation, observability, "
+    "and shipping reliable systems."
+)
+
+st.divider()
+
+# ── 4. Experience ─────────────────────────────────────────────────────────────
+
+st.markdown("## Experience")
+
+experiences = [
+    {
+        "title": "Senior DevOps Engineer",
+        "company": "Reality Defender",
+        "date": "Feb 2025 – Present",
+        "bullets": [
+            "Architected agentic CI/CD pipelines: designed and deployed AI-driven CI/CD workflows that autonomously detect build failures, triage root causes, and trigger corrective actions",
+            "Engineered agentic observability platform: built self-configuring dashboards using Prometheus and Datadog that automatically surface anomalies and correlate alerts across multi-region EKS clusters",
+            "Slashed GPU spend ~30%: authored reusable Terraform module library and automated shutdown of idle GPU nodes",
+        ],
+    },
+    {
+        "title": "Senior DevOps Engineer",
+        "company": "Capital Rx",
+        "date": "Feb 2024 – Feb 2025",
+        "bullets": [
+            "Architected AI infrastructure from the ground up: founding infrastructure engineer for the AI team; stood up Bedrock/SageMaker pipelines powering a RAG chatbot and voice agents serving 50+ staff",
+            "Drove 25% latency reduction: deployed Zipkin distributed tracing across 26 microservices and Lambda functions, accelerating root-cause analysis and incident resolution",
+        ],
+    },
+    {
+        "title": "Software Engineer — DevOps",
+        "company": "Synopsys",
+        "date": "Nov 2020 – Feb 2024",
+        "bullets": [
+            "Spearheaded CI/CD migration to AKS: containerized ARM and PowerPC toolchains and migrated thousands of nightly regressions to Azure Kubernetes Service",
+            "Engineered mission-critical observability platform for 4,000+ engineers: built a Telegraf, InfluxDB, and Grafana stack that became the primary source of truth for incident response",
+        ],
+    },
+    {
+        "title": "Full Stack Software Engineer",
+        "company": "HouseKeys",
+        "date": "Aug 2017 – Aug 2019",
+        "bullets": [
+            "Overhauled analytics infrastructure: replaced legacy Excel-based calculators with R/Shiny dashboards, halving data processing times",
+            "Engineered NLP-driven housing discovery pipeline: built Python pipelines that surfaced affordable-housing applications across 30+ Bay Area municipal sites, increasing inventory coverage ~40%",
+        ],
+    },
+]
+
+for exp in experiences:
+    st.markdown(f"""
+<div class="timeline-item">
+    <strong>{exp['title']}</strong> · {exp['company']}<br>
+    <small style="color:#8B949E">{exp['date']}</small>
+    <ul>{"".join(f"<li>{b}</li>" for b in exp['bullets'])}</ul>
+</div>
+""", unsafe_allow_html=True)
 
 st.divider()
 
@@ -241,17 +248,17 @@ pcol1, pcol2 = st.columns(2)
 with pcol1:
     st.markdown("""
 <div class="card">
-    <strong>🏆 ElevenLabs Hackathon — Finalist</strong><br><br>
-    Built an AI-powered application during the ElevenLabs hackathon, selected as a finalist
-    among competitive entries.
+    <strong>🏆 ElevenLabs Worldwide Hackathon — FluffyDuck Restaurant AI · Finalist</strong><br><br>
+    Architected a multi-channel AI agent system for restaurant marketing using ElevenLabs, fal.ai, and Supabase.
+    Engineered autonomous agents spanning social, email, and phone channels.
 </div>
 """, unsafe_allow_html=True)
 with pcol2:
     st.markdown("""
 <div class="card">
     <strong>🤖 SummaryGPT — Twitter Bot</strong><br><br>
-    Created an automated Twitter bot that uses GPT to summarize trending topics and threads,
-    gaining organic followers through useful daily summaries.
+    Built Twitter bot that generated 10,000+ uses in its first month, leveraging the OpenAI API and Twitter API on GCP.
+    Delivered on-demand tweet summarization — when mentioned, the bot replied with an AI-generated summary.
 </div>
 """, unsafe_allow_html=True)
 
@@ -282,7 +289,7 @@ with ccol1:
     <small style="color:#8B949E">Connect with me</small>
 </div>
 """, unsafe_allow_html=True)
-    st.link_button("Open LinkedIn", "https://www.linkedin.com/in/jeronwong/", use_container_width=True)
+    st.link_button("Open LinkedIn", "https://www.linkedin.com/in/jeronw/", use_container_width=True)
 with ccol2:
     st.markdown("""
 <div class="card">
@@ -307,7 +314,7 @@ st.divider()
 st.markdown("## Resume")
 
 try:
-    with open("Jeron Wong Resume 2026-3.pdf", "rb") as f:
+    with open(RESUME_FILE, "rb") as f:
         pdf_bytes = f.read()
     st.download_button(
         label="📄 Download Resume",
