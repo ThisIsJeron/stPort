@@ -18,22 +18,17 @@ SHARED_CSS = """
 <style>
     .block-container { padding-top: 2rem; padding-bottom: 2rem; }
 
-    /* Force equal-height columns */
-    [data-testid="stHorizontalBlock"] {
-        align-items: stretch !important;
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-bottom: 1rem;
     }
-    [data-testid="stColumn"] > div,
-    [data-testid="stColumn"] > div > div,
-    [data-testid="stColumn"] > div > div > div {
-        height: 100%;
-    }
-
     .card {
         background-color: #161B22;
         border: 1px solid #30363D;
         border-radius: 10px;
         padding: 1.2rem;
-        height: 100%;
         box-sizing: border-box;
         display: flex;
         flex-direction: column;
@@ -41,11 +36,13 @@ SHARED_CSS = """
     .card-link {
         text-decoration: none;
         color: inherit;
-        display: block;
-        height: 100%;
+        display: flex;
     }
     .card-link:hover .card {
         border-color: #4FC3F7;
+    }
+    .card-link .card {
+        flex: 1;
     }
     .badge {
         display: inline-block;
@@ -244,28 +241,22 @@ def main_page():
     st.markdown("## GitHub Repos")
 
     if top_repos:
-        for row_start in range(0, len(top_repos), 3):
-            cols = st.columns(3)
-            for j, col in enumerate(cols):
-                idx = row_start + j
-                if idx >= len(top_repos):
-                    break
-                repo = top_repos[idx]
-                with col:
-                    with st.container():
-                        lang = repo.get("language") or ""
-                        stars = repo.get("stargazers_count", 0)
-                        desc = repo.get("description") or "No description"
-                        url = repo["html_url"]
-                        st.markdown(f"""
+        cards_html = '<div class="card-grid">'
+        for repo in top_repos:
+            lang = repo.get("language") or ""
+            stars = repo.get("stargazers_count", 0)
+            desc = repo.get("description") or "No description"
+            url = repo["html_url"]
+            cards_html += f"""
 <a href="{url}" target="_blank" class="card-link">
 <div class="card">
     <strong>{repo['name']}</strong><br>
-    <small style="color:#8B949E">{desc}</small><br><br>
+    <small style="color:#8B949E">{desc}</small>
     <span style="margin-top:auto"><span class="badge">{lang}</span> ⭐ {stars}</span>
 </div>
-</a>
-""", unsafe_allow_html=True)
+</a>"""
+        cards_html += "</div>"
+        st.markdown(cards_html, unsafe_allow_html=True)
     else:
         st.info("GitHub repos could not be loaded. Visit my profile directly:")
         st.link_button("GitHub Profile", f"https://github.com/{GITHUB_USERNAME}")
@@ -328,25 +319,19 @@ def main_page():
         },
     ]
 
-    for row_start in range(0, len(hackathon_projects), 3):
-        cols = st.columns(3)
-        for j, col in enumerate(cols):
-            idx = row_start + j
-            if idx >= len(hackathon_projects):
-                break
-            proj = hackathon_projects[idx]
-            icon = "🏆" if proj["winner"] else "🤖"
-            with col:
-                with st.container():
-                    st.markdown(f"""
+    proj_html = '<div class="card-grid">'
+    for proj in hackathon_projects:
+        icon = "🏆" if proj["winner"] else "🤖"
+        proj_html += f"""
 <a href="{proj['link']}" target="_blank" class="card-link">
 <div class="card">
     <strong>{icon} {proj['name']}</strong><br>
     <small style="color:#4FC3F7">{proj['award']}</small><br><br>
     <span style="color:#8B949E">{proj['desc']}</span>
 </div>
-</a>
-""", unsafe_allow_html=True)
+</a>"""
+    proj_html += "</div>"
+    st.markdown(proj_html, unsafe_allow_html=True)
 
     st.link_button("View all projects on Devpost", "https://devpost.com/ThisIsJeron")
 
