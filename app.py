@@ -36,18 +36,35 @@ if "resume" in st.query_params:
 st.markdown("""
 <style>
     .block-container { padding-top: 2rem; padding-bottom: 2rem; }
+
+    /* Force equal-height columns */
+    [data-testid="stHorizontalBlock"] {
+        align-items: stretch !important;
+    }
+    [data-testid="stColumn"] > div,
+    [data-testid="stColumn"] > div > div,
+    [data-testid="stColumn"] > div > div > div {
+        height: 100%;
+    }
+
     .card {
         background-color: #161B22;
         border: 1px solid #30363D;
         border-radius: 10px;
         padding: 1.2rem;
-        min-height: 10rem;
+        height: 100%;
+        box-sizing: border-box;
+        display: flex;
+        flex-direction: column;
     }
-    .card a { text-decoration: none; color: inherit; }
-    .card a:hover { color: inherit; }
-    .card-clickable:hover {
+    .card-link {
+        text-decoration: none;
+        color: inherit;
+        display: block;
+        height: 100%;
+    }
+    .card-link:hover .card {
         border-color: #4FC3F7;
-        cursor: pointer;
     }
     .badge {
         display: inline-block;
@@ -236,11 +253,11 @@ if top_repos:
                     desc = repo.get("description") or "No description"
                     url = repo["html_url"]
                     st.markdown(f"""
-<a href="{url}" target="_blank" style="text-decoration:none;color:inherit">
-<div class="card card-clickable">
+<a href="{url}" target="_blank" class="card-link">
+<div class="card">
     <strong>{repo['name']}</strong><br>
     <small style="color:#8B949E">{desc}</small><br><br>
-    <span class="badge">{lang}</span> ⭐ {stars}
+    <span style="margin-top:auto"><span class="badge">{lang}</span> ⭐ {stars}</span>
 </div>
 </a>
 """, unsafe_allow_html=True)
@@ -317,11 +334,11 @@ for row_start in range(0, len(hackathon_projects), 3):
         with col:
             with st.container():
                 st.markdown(f"""
-<a href="{proj['link']}" target="_blank" style="text-decoration:none;color:inherit">
-<div class="card card-clickable">
+<a href="{proj['link']}" target="_blank" class="card-link">
+<div class="card">
     <strong>{icon} {proj['name']}</strong><br>
     <small style="color:#4FC3F7">{proj['award']}</small><br><br>
-    {proj['desc']}
+    <span style="color:#8B949E">{proj['desc']}</span>
 </div>
 </a>
 """, unsafe_allow_html=True)
