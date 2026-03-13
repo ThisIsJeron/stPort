@@ -197,22 +197,29 @@ def main_page():
         ],
     }
 
-    skills_html = '<div class="card-grid" style="grid-template-columns: repeat(5, 1fr);">'
-    for category, skills in skill_categories.items():
-        badges = ""
-        for skill in skills:
-            name, url = skill
-            if url:
-                badges += f'<a href="{url}" target="_blank" class="badge-link"><span class="badge">{name}</span></a>'
-            else:
-                badges += f'<span class="badge">{name}</span>'
-        skills_html += f"""
-<div>
-    <strong>{category}</strong><br><br>
-    {badges}
-</div>"""
-    skills_html += "</div>"
-    st.markdown(skills_html, unsafe_allow_html=True)
+    def _render_skill_badges(categories):
+        html = ""
+        for category, skills in categories.items():
+            badges = ""
+            for name, url in skills:
+                if url:
+                    badges += f'<a href="{url}" target="_blank" class="badge-link"><span class="badge">{name}</span></a>'
+                else:
+                    badges += f'<span class="badge">{name}</span>'
+            html += f'<div><strong>{category}</strong><br><br>{badges}</div>'
+        return html
+
+    row1 = {"Programming Languages": skill_categories["Programming Languages"],
+            "Tools & Libraries": skill_categories["Tools & Libraries"],
+            "AI/ML Infrastructure": skill_categories["AI/ML Infrastructure"]}
+    row2 = {"Environments & Services": skill_categories["Environments & Services"],
+            "World Languages": skill_categories["World Languages"]}
+
+    st.markdown(
+        f'<div class="card-grid" style="grid-template-columns: repeat(3, 1fr);">{_render_skill_badges(row1)}</div>'
+        f'<div class="card-grid" style="grid-template-columns: repeat(3, 1fr); margin-top: 1.5rem;">{_render_skill_badges(row2)}</div>',
+        unsafe_allow_html=True,
+    )
 
     st.divider()
 
@@ -235,6 +242,7 @@ def main_page():
         {
             "title": "Senior DevOps Engineer",
             "company": "Reality Defender",
+            "url": "https://realitydefender.ai/",
             "date": "Feb 2025 – Present",
             "bullets": [
                 "Architected agentic CI/CD pipelines: designed and deployed AI-driven CI/CD workflows that autonomously detect build failures, triage root causes, and trigger corrective actions",
@@ -245,6 +253,7 @@ def main_page():
         {
             "title": "Senior DevOps Engineer",
             "company": "Capital Rx",
+            "url": "https://www.capitalrx.com/",
             "date": "Feb 2024 – Feb 2025",
             "bullets": [
                 "Architected AI infrastructure from the ground up: founding infrastructure engineer for the AI team; stood up Bedrock/SageMaker pipelines powering a RAG chatbot and voice agents serving 50+ staff",
@@ -254,6 +263,7 @@ def main_page():
         {
             "title": "Software Engineer — DevOps",
             "company": "Synopsys",
+            "url": "https://www.synopsys.com/",
             "date": "Nov 2020 – Feb 2024",
             "bullets": [
                 "Spearheaded CI/CD migration to AKS: containerized ARM and PowerPC toolchains and migrated thousands of nightly regressions to Azure Kubernetes Service",
@@ -263,6 +273,7 @@ def main_page():
         {
             "title": "Full Stack Software Engineer",
             "company": "HouseKeys",
+            "url": "https://www.housekeys.org/",
             "date": "Aug 2017 – Aug 2019",
             "bullets": [
                 "Overhauled analytics infrastructure: replaced legacy Excel-based calculators with R/Shiny dashboards, halving data processing times",
@@ -272,9 +283,10 @@ def main_page():
     ]
 
     for exp in experiences:
+        company_link = f'<a href="{exp["url"]}" target="_blank">{exp["company"]}</a>'
         st.markdown(f"""
 <div class="timeline-item">
-    <strong>{exp['title']}</strong> · {exp['company']}<br>
+    <strong>{exp['title']}</strong> · {company_link}<br>
     <small style="color:#8B949E">{exp['date']}</small>
     <ul>{"".join(f"<li>{b}</li>" for b in exp['bullets'])}</ul>
 </div>
