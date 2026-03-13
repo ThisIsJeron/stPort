@@ -1,5 +1,8 @@
 import streamlit as st
 import requests
+import pandas as pd
+from datetime import datetime, timedelta
+from streamlit_lottie import st_lottie
 
 RESUME_FILE = "Jeron Wong Resume 2026-3.pdf"
 GITHUB_USERNAME = "ThisIsJeron"
@@ -16,6 +19,7 @@ st.set_page_config(
 
 SHARED_CSS = """
 <style>
+    html { scroll-behavior: smooth; }
     .block-container { padding-top: 2rem; padding-bottom: 2rem; }
 
     .card-grid {
@@ -84,8 +88,70 @@ SHARED_CSS = """
         margin-bottom: 1.5rem;
     }
     a { color: #4FC3F7; }
+
+    /* ── Section Navigation ── */
+    .section-nav {
+        position: fixed;
+        top: 3.5rem;
+        left: 50%;
+        transform: translateX(-50%);
+        z-index: 9999;
+        display: flex;
+        gap: 0.4rem;
+        background: rgba(13, 17, 23, 0.85);
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid #30363D;
+        border-radius: 25px;
+        padding: 0.4rem 0.8rem;
+    }
+    .section-nav a {
+        color: #8B949E;
+        text-decoration: none;
+        font-size: 0.8rem;
+        padding: 0.3rem 0.7rem;
+        border-radius: 15px;
+        transition: all 0.2s ease;
+        white-space: nowrap;
+    }
+    .section-nav a:hover {
+        color: #E6EDF3;
+        background: rgba(79, 195, 247, 0.15);
+    }
 </style>
 """
+
+# ── Section Navigation HTML ──────────────────────────────────────────────────
+
+SECTION_NAV = """
+<div class="section-nav">
+    <a href="#skills">Skills</a>
+    <a href="#about">About</a>
+    <a href="#experience">Experience</a>
+    <a href="#repos">Repos</a>
+    <a href="#activity">Activity</a>
+    <a href="#projects">Projects</a>
+    <a href="#education">Education</a>
+    <a href="#contact">Contact</a>
+</div>
+"""
+
+# ── Lottie Helper ────────────────────────────────────────────────────────────
+
+LOTTIE_CODING_URL = "https://assets2.lottiefiles.com/packages/lf20_fcfjwiyb.json"
+
+
+@st.cache_data(ttl=86400)
+def load_lottie_url(url: str):
+    """Fetch a Lottie animation JSON from a URL."""
+    try:
+        r = requests.get(url, timeout=10)
+        if r.status_code == 200:
+            return r.json()
+    except requests.RequestException:
+        pass
+    return None
+
 
 # ── GitHub API ───────────────────────────────────────────────────────────────
 
@@ -116,6 +182,131 @@ def fetch_github_data():
     return profile, repos
 
 
+@st.cache_data(ttl=3600)
+def fetch_github_activity():
+    """Fetch recent GitHub push events and group by date (last 30 days)."""
+    events = []
+    try:
+        for page in range(1, 4):
+            resp = requests.get(
+                f"https://api.github.com/users/{GITHUB_USERNAME}/events",
+                params={"per_page": 100, "page": page},
+                timeout=10,
+            )
+            if resp.status_code != 200:
+                break
+            batch = resp.json()
+            if not batch:
+                break
+            events.extend(batch)
+    except requests.RequestException:
+        pass
+
+    cutoff = datetime.utcnow() - timedelta(days=30)
+    push_counts = {}
+    for ev in events:
+        if ev.get("type") != "PushEvent":
+            continue
+        created = ev.get("created_at", "")
+        try:
+            dt = datetime.strptime(created, "%Y-%m-%dT%H:%M:%SZ")
+        except ValueError:
+            continue
+        if dt < cutoff:
+            continue
+        day = dt.strftime("%Y-%m-%d")
+        push_counts[day] = push_counts.get(day, 0) + 1
+
+    if not push_counts:
+        return None
+
+    today = datetime.utcnow().date()
+    all_days = [(today - timedelta(days=i)).isoformat() for i in range(29, -1, -1)]
+    df = pd.DataFrame({
+        "Date": all_days,
+        "Pushes": [push_counts.get(d, 0) for d in all_days],
+    })
+    df["Date"] = pd.to_datetime(df["Date"])
+    return df
+
+
+# ── Project Detail Dialogs ───────────────────────────────────────────────────
+
+HACKATHON_PROJECTS = [
+    {
+        "name": "FluffyDuck — Restaurant AI Agent",
+        "award": "Finalist · ElevenLabs Worldwide Hackathon",
+        "desc": "Multi-channel AI agent system for restaurant marketing using ElevenLabs, fal.ai, and Supabase. Autonomous agents spanning social, email, and phone channels.",
+        "tech": ["ElevenLabs", "fal.ai", "Supabase", "Python"],
+        "winner": True,
+        "link": "https://devpost.com/software/fluffyduck-restaurant-marketing-and-reservations-ai-agent",
+    },
+    {
+        "name": "LINC — LGBTQ In Need of Chatbot",
+        "award": "Winner · Best Conversational AI · MHacks 11",
+        "desc": "Conversational AI chatbot providing support for LGBTQ individuals via SMS and voice calls. Built with Clinc AI, Twilio, and Google Cloud Platform.",
+        "tech": ["Clinc AI", "Twilio", "GCP", "Python"],
+        "winner": True,
+        "link": "https://devpost.com/software/linc",
+    },
+    {
+        "name": "BasicSloth — Encrypted Radio Comms",
+        "award": "Winner · Innovative Use of Speech · YHack 2015",
+        "desc": "Encrypted communications over software-defined radio with speech-to-text integration. PGP encryption via GnuRadio and Nuance speech API.",
+        "tech": ["GnuRadio", "PGP", "Nuance API", "Python"],
+        "winner": True,
+        "link": "https://devpost.com/software/basicsloth",
+    },
+    {
+        "name": "ToneFolio — Stock Sentiment Analyzer",
+        "award": "Winner · BlackRock Challenge · Cal Hacks 3.0",
+        "desc": "Predicts if your stock portfolio is bullish or bearish using IBM Watson Tone Analyzer on financial news, integrated with BlackRock's Aladdin API.",
+        "tech": ["IBM Watson", "BlackRock Aladdin API", "Python"],
+        "winner": True,
+        "link": "https://devpost.com/software/tonefolio",
+    },
+    {
+        "name": "CEEDR — Energy Data Visualization",
+        "award": "Winner · Best Use of OSISoft API · HackDavis 2017",
+        "desc": "Visualized and predicted UC Davis energy consumption patterns with R/Shiny dashboards and an Amazon Alexa skill for voice-activated data queries.",
+        "tech": ["R/Shiny", "OSISoft API", "Amazon Alexa", "AWS Lambda"],
+        "winner": True,
+        "link": "https://devpost.com/software/ceedr",
+    },
+    {
+        "name": "Emoji Pasta Generator",
+        "award": "Winner",
+        "desc": "Text transformation tool for generating emoji-enriched content.",
+        "tech": ["Python", "NLP"],
+        "winner": True,
+        "link": "https://devpost.com/software/emojipasta-generator",
+    },
+    {
+        "name": "SummaryGPT — Twitter Bot",
+        "award": "10,000+ uses in first month",
+        "desc": "Twitter bot leveraging OpenAI API on GCP. When mentioned, replies with an AI-generated summary of the referenced tweet thread.",
+        "tech": ["OpenAI API", "GCP", "Twitter API", "Python"],
+        "winner": False,
+        "link": "https://github.com/ThisIsJeron/SummaryGPT",
+    },
+]
+
+
+def _make_project_dialog(proj):
+    """Create a dialog function for a specific project."""
+    @st.dialog(proj["name"])
+    def _dialog():
+        icon = "🏆" if proj["winner"] else "🤖"
+        st.markdown(f"**{icon} {proj['award']}**")
+        st.markdown(proj["desc"])
+        st.markdown("**Tech Stack**")
+        badges_html = " ".join(f'<span class="badge">{t}</span>' for t in proj["tech"])
+        st.markdown(badges_html, unsafe_allow_html=True)
+        st.divider()
+        st.link_button("View on Devpost / GitHub", proj["link"], use_container_width=True)
+    return _dialog
+
+
 # ── Resume Page (/resume) ────────────────────────────────────────────────────
 
 
@@ -141,14 +332,21 @@ def resume_page():
 
 def main_page():
     st.markdown(SHARED_CSS, unsafe_allow_html=True)
+    st.html(SECTION_NAV)
 
     profile, top_repos = fetch_github_data()
 
     # ── 1. Hero ──────────────────────────────────────────────────────────────
 
-    st.markdown('<p class="hero-name">Jeron Wong</p>', unsafe_allow_html=True)
-    st.markdown('<p class="hero-subtitle">DevOps / Platform Engineer</p>', unsafe_allow_html=True)
-    st.markdown('<p class="hero-location">Berkeley, CA</p>', unsafe_allow_html=True)
+    hero_left, hero_right = st.columns([3, 1])
+    with hero_left:
+        st.markdown('<p class="hero-name">Jeron Wong</p>', unsafe_allow_html=True)
+        st.markdown('<p class="hero-subtitle">DevOps / Platform Engineer</p>', unsafe_allow_html=True)
+        st.markdown('<p class="hero-location">Berkeley, CA</p>', unsafe_allow_html=True)
+    with hero_right:
+        lottie_data = load_lottie_url(LOTTIE_CODING_URL)
+        if lottie_data:
+            st_lottie(lottie_data, height=150, key="hero_lottie")
 
     _, link_col1, link_col2, _ = st.columns([2, 1, 1, 2])
     with link_col1:
@@ -160,7 +358,7 @@ def main_page():
 
     # ── 2. Skills ────────────────────────────────────────────────────────────
 
-    st.markdown("## Skills")
+    st.markdown('<h2 id="skills">Skills</h2>', unsafe_allow_html=True)
 
     skill_categories = {
         "Programming Languages": [
@@ -225,7 +423,7 @@ def main_page():
 
     # ── 3. About ─────────────────────────────────────────────────────────────
 
-    st.markdown("## About")
+    st.markdown('<h2 id="about">About</h2>', unsafe_allow_html=True)
     st.markdown(
         "DevOps / Platform Engineer with experience building and scaling CI/CD pipelines, cloud infrastructure, "
         "and developer tooling across startups and enterprise. Passionate about automation, observability, "
@@ -236,7 +434,7 @@ def main_page():
 
     # ── 4. Experience ────────────────────────────────────────────────────────
 
-    st.markdown("## Experience")
+    st.markdown('<h2 id="experience">Experience</h2>', unsafe_allow_html=True)
 
     experiences = [
         {
@@ -296,7 +494,7 @@ def main_page():
 
     # ── 5. GitHub Repos ──────────────────────────────────────────────────────
 
-    st.markdown("## GitHub Repos")
+    st.markdown('<h2 id="repos">GitHub Repos</h2>', unsafe_allow_html=True)
 
     if top_repos:
         cards_html = '<div class="card-grid">'
@@ -321,75 +519,43 @@ def main_page():
 
     st.divider()
 
+    # ── 5b. GitHub Activity Chart ────────────────────────────────────────────
+
+    st.markdown('<h2 id="activity">GitHub Activity</h2>', unsafe_allow_html=True)
+
+    activity_df = fetch_github_activity()
+    if activity_df is not None:
+        st.caption("Push events — last 30 days")
+        st.bar_chart(activity_df, x="Date", y="Pushes", color="#4FC3F7")
+    else:
+        st.info("No recent GitHub activity to display.")
+
+    st.divider()
+
     # ── 6. Projects & Awards ─────────────────────────────────────────────────
 
-    st.markdown("## Projects & Awards")
+    st.markdown('<h2 id="projects">Projects & Awards</h2>', unsafe_allow_html=True)
 
-    hackathon_projects = [
-        {
-            "name": "FluffyDuck — Restaurant AI Agent",
-            "award": "Finalist · ElevenLabs Worldwide Hackathon",
-            "desc": "Multi-channel AI agent system for restaurant marketing using ElevenLabs, fal.ai, and Supabase. Autonomous agents spanning social, email, and phone channels.",
-            "winner": True,
-            "link": "https://devpost.com/software/fluffyduck-restaurant-marketing-and-reservations-ai-agent",
-        },
-        {
-            "name": "LINC — LGBTQ In Need of Chatbot",
-            "award": "Winner · Best Conversational AI · MHacks 11",
-            "desc": "Conversational AI chatbot providing support for LGBTQ individuals via SMS and voice calls. Built with Clinc AI, Twilio, and Google Cloud Platform.",
-            "winner": True,
-            "link": "https://devpost.com/software/linc",
-        },
-        {
-            "name": "BasicSloth — Encrypted Radio Comms",
-            "award": "Winner · Innovative Use of Speech · YHack 2015",
-            "desc": "Encrypted communications over software-defined radio with speech-to-text integration. PGP encryption via GnuRadio and Nuance speech API.",
-            "winner": True,
-            "link": "https://devpost.com/software/basicsloth",
-        },
-        {
-            "name": "ToneFolio — Stock Sentiment Analyzer",
-            "award": "Winner · BlackRock Challenge · Cal Hacks 3.0",
-            "desc": "Predicts if your stock portfolio is bullish or bearish using IBM Watson Tone Analyzer on financial news, integrated with BlackRock's Aladdin API.",
-            "winner": True,
-            "link": "https://devpost.com/software/tonefolio",
-        },
-        {
-            "name": "CEEDR — Energy Data Visualization",
-            "award": "Winner · Best Use of OSISoft API · HackDavis 2017",
-            "desc": "Visualized and predicted UC Davis energy consumption patterns with R/Shiny dashboards and an Amazon Alexa skill for voice-activated data queries.",
-            "winner": True,
-            "link": "https://devpost.com/software/ceedr",
-        },
-        {
-            "name": "Emoji Pasta Generator",
-            "award": "Winner",
-            "desc": "Text transformation tool for generating emoji-enriched content.",
-            "winner": True,
-            "link": "https://devpost.com/software/emojipasta-generator",
-        },
-        {
-            "name": "SummaryGPT — Twitter Bot",
-            "award": "10,000+ uses in first month",
-            "desc": "Twitter bot leveraging OpenAI API on GCP. When mentioned, replies with an AI-generated summary of the referenced tweet thread.",
-            "winner": False,
-            "link": "https://github.com/ThisIsJeron/SummaryGPT",
-        },
-    ]
+    # Build dialog functions once
+    dialogs = [_make_project_dialog(p) for p in HACKATHON_PROJECTS]
 
-    proj_html = '<div class="card-grid">'
-    for proj in hackathon_projects:
-        icon = "🏆" if proj["winner"] else "🤖"
-        proj_html += f"""
-<a href="{proj['link']}" target="_blank" class="card-link">
+    # Render project cards as columns with buttons to trigger dialogs
+    for row_start in range(0, len(HACKATHON_PROJECTS), 3):
+        row_projects = HACKATHON_PROJECTS[row_start:row_start + 3]
+        row_dialogs = dialogs[row_start:row_start + 3]
+        cols = st.columns(3)
+        for idx, (proj, dialog_fn) in enumerate(zip(row_projects, row_dialogs)):
+            with cols[idx]:
+                icon = "🏆" if proj["winner"] else "🤖"
+                st.markdown(f"""
 <div class="card">
     <strong>{icon} {proj['name']}</strong><br>
     <small style="color:#4FC3F7">{proj['award']}</small><br><br>
     <span style="color:#8B949E">{proj['desc']}</span>
 </div>
-</a>"""
-    proj_html += "</div>"
-    st.markdown(proj_html, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
+                if st.button("View Details", key=f"proj_{row_start + idx}", use_container_width=True):
+                    dialog_fn()
 
     st.link_button("View all projects on Devpost", "https://devpost.com/ThisIsJeron")
 
@@ -397,7 +563,7 @@ def main_page():
 
     # ── 7. Education ─────────────────────────────────────────────────────────
 
-    st.markdown("## Education")
+    st.markdown('<h2 id="education">Education</h2>', unsafe_allow_html=True)
     st.markdown("""
 <div class="card">
     <strong>University of Illinois at Urbana-Champaign</strong><br>
@@ -410,7 +576,7 @@ def main_page():
 
     # ── 8. Contact ───────────────────────────────────────────────────────────
 
-    st.markdown("## Contact")
+    st.markdown('<h2 id="contact">Contact</h2>', unsafe_allow_html=True)
 
     ccol1, ccol2, ccol3 = st.columns(3)
     with ccol1:
