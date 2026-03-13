@@ -88,52 +88,36 @@ SHARED_CSS = """
         margin-bottom: 1.5rem;
     }
     a { color: #4FC3F7; }
-
-    /* ── Section Navigation ── */
-    .section-nav {
-        position: fixed;
-        top: 3.5rem;
-        left: 50%;
-        transform: translateX(-50%);
-        z-index: 9999;
-        display: flex;
-        gap: 0.4rem;
-        background: rgba(13, 17, 23, 0.85);
-        backdrop-filter: blur(10px);
-        -webkit-backdrop-filter: blur(10px);
-        border: 1px solid #30363D;
-        border-radius: 25px;
-        padding: 0.4rem 0.8rem;
-    }
-    .section-nav a {
-        color: #8B949E;
-        text-decoration: none;
-        font-size: 0.8rem;
-        padding: 0.3rem 0.7rem;
-        border-radius: 15px;
-        transition: all 0.2s ease;
-        white-space: nowrap;
-    }
-    .section-nav a:hover {
-        color: #E6EDF3;
-        background: rgba(79, 195, 247, 0.15);
-    }
 </style>
 """
 
-# ── Section Navigation HTML ──────────────────────────────────────────────────
+# ── Section Navigation (sidebar) ─────────────────────────────────────────────
 
-SECTION_NAV = """
-<div class="section-nav">
-    <a href="#skills">Skills</a>
-    <a href="#about">About</a>
-    <a href="#experience">Experience</a>
-    <a href="#repos">Repos</a>
-    <a href="#activity">Activity</a>
-    <a href="#projects">Projects</a>
-    <a href="#education">Education</a>
-    <a href="#contact">Contact</a>
-</div>
+NAV_SECTIONS = [
+    ("Skills", "Skills"),
+    ("About", "About"),
+    ("Experience", "Experience"),
+    ("GitHub Repos", "GitHub Repos"),
+    ("GitHub Activity", "GitHub Activity"),
+    ("Projects & Awards", "Projects & Awards"),
+    ("Education", "Education"),
+    ("Contact", "Contact"),
+]
+
+SCROLL_JS_TEMPLATE = """
+<script>
+(function() {{
+    const target = "{section_text}";
+    const mainDoc = window.parent.document;
+    const headers = mainDoc.querySelectorAll('h2, h1');
+    for (const h of headers) {{
+        if (h.textContent.trim() === target) {{
+            h.scrollIntoView({{ behavior: 'smooth', block: 'start' }});
+            break;
+        }}
+    }}
+}})();
+</script>
 """
 
 # ── Lottie Helper ────────────────────────────────────────────────────────────
@@ -332,21 +316,27 @@ def resume_page():
 
 def main_page():
     st.markdown(SHARED_CSS, unsafe_allow_html=True)
-    st.html(SECTION_NAV)
+
+    # ── Sidebar Navigation ───────────────────────────────────────────────────
+    with st.sidebar:
+        st.markdown("### Navigate")
+        for label, section_text in NAV_SECTIONS:
+            if st.button(label, key=f"nav_{label}", use_container_width=True):
+                st.html(SCROLL_JS_TEMPLATE.format(section_text=section_text))
 
     profile, top_repos = fetch_github_data()
 
     # ── 1. Hero ──────────────────────────────────────────────────────────────
 
-    hero_left, hero_right = st.columns([3, 1])
-    with hero_left:
-        st.markdown('<p class="hero-name">Jeron Wong</p>', unsafe_allow_html=True)
-        st.markdown('<p class="hero-subtitle">DevOps / Platform Engineer</p>', unsafe_allow_html=True)
-        st.markdown('<p class="hero-location">Berkeley, CA</p>', unsafe_allow_html=True)
-    with hero_right:
-        lottie_data = load_lottie_url(LOTTIE_CODING_URL)
-        if lottie_data:
-            st_lottie(lottie_data, height=150, key="hero_lottie")
+    st.markdown('<p class="hero-name">Jeron Wong</p>', unsafe_allow_html=True)
+    st.markdown('<p class="hero-subtitle">DevOps / Platform Engineer</p>', unsafe_allow_html=True)
+    st.markdown('<p class="hero-location">Berkeley, CA</p>', unsafe_allow_html=True)
+
+    lottie_data = load_lottie_url(LOTTIE_CODING_URL)
+    if lottie_data:
+        _, lottie_col, _ = st.columns([2, 1, 2])
+        with lottie_col:
+            st_lottie(lottie_data, height=120, key="hero_lottie")
 
     _, link_col1, link_col2, _ = st.columns([2, 1, 1, 2])
     with link_col1:
@@ -358,7 +348,7 @@ def main_page():
 
     # ── 2. Skills ────────────────────────────────────────────────────────────
 
-    st.markdown('<h2 id="skills">Skills</h2>', unsafe_allow_html=True)
+    st.markdown("## Skills")
 
     skill_categories = {
         "Programming Languages": [
@@ -423,7 +413,7 @@ def main_page():
 
     # ── 3. About ─────────────────────────────────────────────────────────────
 
-    st.markdown('<h2 id="about">About</h2>', unsafe_allow_html=True)
+    st.markdown("## About")
     st.markdown(
         "DevOps / Platform Engineer with experience building and scaling CI/CD pipelines, cloud infrastructure, "
         "and developer tooling across startups and enterprise. Passionate about automation, observability, "
@@ -434,7 +424,7 @@ def main_page():
 
     # ── 4. Experience ────────────────────────────────────────────────────────
 
-    st.markdown('<h2 id="experience">Experience</h2>', unsafe_allow_html=True)
+    st.markdown("## Experience")
 
     experiences = [
         {
@@ -494,7 +484,7 @@ def main_page():
 
     # ── 5. GitHub Repos ──────────────────────────────────────────────────────
 
-    st.markdown('<h2 id="repos">GitHub Repos</h2>', unsafe_allow_html=True)
+    st.markdown("## GitHub Repos")
 
     if top_repos:
         cards_html = '<div class="card-grid">'
@@ -521,7 +511,7 @@ def main_page():
 
     # ── 5b. GitHub Activity Chart ────────────────────────────────────────────
 
-    st.markdown('<h2 id="activity">GitHub Activity</h2>', unsafe_allow_html=True)
+    st.markdown("## GitHub Activity")
 
     activity_df = fetch_github_activity()
     if activity_df is not None:
@@ -534,7 +524,7 @@ def main_page():
 
     # ── 6. Projects & Awards ─────────────────────────────────────────────────
 
-    st.markdown('<h2 id="projects">Projects & Awards</h2>', unsafe_allow_html=True)
+    st.markdown("## Projects & Awards")
 
     # Build dialog functions once
     dialogs = [_make_project_dialog(p) for p in HACKATHON_PROJECTS]
@@ -563,7 +553,7 @@ def main_page():
 
     # ── 7. Education ─────────────────────────────────────────────────────────
 
-    st.markdown('<h2 id="education">Education</h2>', unsafe_allow_html=True)
+    st.markdown("## Education")
     st.markdown("""
 <div class="card">
     <strong>University of Illinois at Urbana-Champaign</strong><br>
@@ -576,7 +566,7 @@ def main_page():
 
     # ── 8. Contact ───────────────────────────────────────────────────────────
 
-    st.markdown('<h2 id="contact">Contact</h2>', unsafe_allow_html=True)
+    st.markdown("## Contact")
 
     ccol1, ccol2, ccol3 = st.columns(3)
     with ccol1:
