@@ -8,7 +8,7 @@ RESUME_FILE = "Jeron Wong Resume 2026-3.pdf"
 # ── Page Config ──────────────────────────────────────────────────────────────
 
 st.set_page_config(
-    page_title="Jeron Wong | Sr. DevOps Engineer",
+    page_title="Jeron Wong | DevOps / Platform Engineer",
     page_icon="💻",
     layout="wide",
 )
@@ -41,7 +41,13 @@ st.markdown("""
         border: 1px solid #30363D;
         border-radius: 10px;
         padding: 1.2rem;
-        height: 100%;
+        min-height: 10rem;
+    }
+    .card a { text-decoration: none; color: inherit; }
+    .card a:hover { color: inherit; }
+    .card-clickable:hover {
+        border-color: #4FC3F7;
+        cursor: pointer;
     }
     .badge {
         display: inline-block;
@@ -54,20 +60,21 @@ st.markdown("""
         color: #E6EDF3;
     }
     .hero-name {
-        font-size: 3.5rem;
-        font-weight: 700;
-        text-align: center;
-        margin-bottom: 0;
+        font-size: 3.5rem !important;
+        font-weight: 700 !important;
+        text-align: center !important;
+        margin-bottom: 0 !important;
+        line-height: 1.2 !important;
     }
     .hero-subtitle {
-        font-size: 1.3rem;
-        text-align: center;
-        color: #8B949E;
-        margin-top: 0;
+        font-size: 1.3rem !important;
+        text-align: center !important;
+        color: #8B949E !important;
+        margin-top: 0 !important;
     }
     .hero-location {
-        text-align: center;
-        color: #8B949E;
+        text-align: center !important;
+        color: #8B949E !important;
     }
     .timeline-item {
         border-left: 2px solid #4FC3F7;
@@ -114,7 +121,7 @@ profile, top_repos = fetch_github_data()
 # ── 1. Hero ──────────────────────────────────────────────────────────────────
 
 st.markdown('<p class="hero-name">Jeron Wong</p>', unsafe_allow_html=True)
-st.markdown('<p class="hero-subtitle">Senior DevOps Engineer</p>', unsafe_allow_html=True)
+st.markdown('<p class="hero-subtitle">DevOps / Platform Engineer</p>', unsafe_allow_html=True)
 st.markdown('<p class="hero-location">Berkeley, CA</p>', unsafe_allow_html=True)
 
 _, link_col1, link_col2, _ = st.columns([2, 1, 1, 2])
@@ -148,7 +155,7 @@ st.divider()
 
 st.markdown("## About")
 st.markdown(
-    "Senior DevOps Engineer with experience building and scaling CI/CD pipelines, cloud infrastructure, "
+    "DevOps / Platform Engineer with experience building and scaling CI/CD pipelines, cloud infrastructure, "
     "and developer tooling across startups and enterprise. Passionate about automation, observability, "
     "and shipping reliable systems."
 )
@@ -223,17 +230,20 @@ if top_repos:
                 break
             repo = top_repos[idx]
             with col:
-                lang = repo.get("language") or ""
-                stars = repo.get("stargazers_count", 0)
-                desc = repo.get("description") or "No description"
-                st.markdown(f"""
-<div class="card">
+                with st.container():
+                    lang = repo.get("language") or ""
+                    stars = repo.get("stargazers_count", 0)
+                    desc = repo.get("description") or "No description"
+                    url = repo["html_url"]
+                    st.markdown(f"""
+<a href="{url}" target="_blank" style="text-decoration:none;color:inherit">
+<div class="card card-clickable">
     <strong>{repo['name']}</strong><br>
     <small style="color:#8B949E">{desc}</small><br><br>
     <span class="badge">{lang}</span> ⭐ {stars}
 </div>
+</a>
 """, unsafe_allow_html=True)
-                st.link_button("View Repo", repo["html_url"], use_container_width=True)
 else:
     st.info("GitHub repos could not be loaded. Visit my profile directly:")
     st.link_button("GitHub Profile", f"https://github.com/{GITHUB_USERNAME}")
@@ -250,42 +260,49 @@ hackathon_projects = [
         "award": "Finalist · ElevenLabs Worldwide Hackathon",
         "desc": "Multi-channel AI agent system for restaurant marketing using ElevenLabs, fal.ai, and Supabase. Autonomous agents spanning social, email, and phone channels.",
         "winner": True,
+        "link": "https://devpost.com/software/fluffyduck-restaurant-marketing-and-reservations-ai-agent",
     },
     {
         "name": "LINC — LGBTQ In Need of Chatbot",
         "award": "Winner · Best Conversational AI · MHacks 11",
         "desc": "Conversational AI chatbot providing support for LGBTQ individuals via SMS and voice calls. Built with Clinc AI, Twilio, and Google Cloud Platform.",
         "winner": True,
+        "link": "https://devpost.com/software/linc",
     },
     {
         "name": "BasicSloth — Encrypted Radio Comms",
         "award": "Winner · Innovative Use of Speech · YHack 2015",
         "desc": "Encrypted communications over software-defined radio with speech-to-text integration. PGP encryption via GnuRadio and Nuance speech API.",
         "winner": True,
+        "link": "https://devpost.com/software/basicsloth",
     },
     {
         "name": "ToneFolio — Stock Sentiment Analyzer",
         "award": "Winner · BlackRock Challenge · Cal Hacks 3.0",
         "desc": "Predicts if your stock portfolio is bullish or bearish using IBM Watson Tone Analyzer on financial news, integrated with BlackRock's Aladdin API.",
         "winner": True,
+        "link": "https://devpost.com/software/tonefolio",
     },
     {
         "name": "CEEDR — Energy Data Visualization",
         "award": "Winner · Best Use of OSISoft API · HackDavis 2017",
         "desc": "Visualized and predicted UC Davis energy consumption patterns with R/Shiny dashboards and an Amazon Alexa skill for voice-activated data queries.",
         "winner": True,
+        "link": "https://devpost.com/software/ceedr",
     },
     {
         "name": "Emoji Pasta Generator",
         "award": "Winner",
         "desc": "Text transformation tool for generating emoji-enriched content.",
         "winner": True,
+        "link": "https://devpost.com/software/emojipasta-generator",
     },
     {
         "name": "SummaryGPT — Twitter Bot",
         "award": "10,000+ uses in first month",
         "desc": "Twitter bot leveraging OpenAI API on GCP. When mentioned, replies with an AI-generated summary of the referenced tweet thread.",
         "winner": False,
+        "link": "https://github.com/ThisIsJeron/SummaryGPT",
     },
 ]
 
@@ -298,12 +315,15 @@ for row_start in range(0, len(hackathon_projects), 3):
         proj = hackathon_projects[idx]
         icon = "🏆" if proj["winner"] else "🤖"
         with col:
-            st.markdown(f"""
-<div class="card">
+            with st.container():
+                st.markdown(f"""
+<a href="{proj['link']}" target="_blank" style="text-decoration:none;color:inherit">
+<div class="card card-clickable">
     <strong>{icon} {proj['name']}</strong><br>
     <small style="color:#4FC3F7">{proj['award']}</small><br><br>
     {proj['desc']}
 </div>
+</a>
 """, unsafe_allow_html=True)
 
 st.link_button("View all projects on Devpost", "https://devpost.com/ThisIsJeron")
