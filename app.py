@@ -1,5 +1,3 @@
-import base64
-
 import streamlit as st
 import requests
 
@@ -118,29 +116,20 @@ def fetch_github_data():
 
 
 def resume_page():
-    st.markdown("## Downloading Resume...")
+    st.markdown("# Jeron Wong — Resume")
     try:
         with open(RESUME_FILE, "rb") as f:
-            b64 = base64.b64encode(f.read()).decode()
-        st.html(
-            f"""
-            <html><body>
-            <a id="dl" href="data:application/pdf;base64,{b64}"
-               download="Jeron_Wong_Resume.pdf"
-               style="color:#4FC3F7;font-size:1.1rem">
-               Click here if download does not start
-            </a>
-            <script>
-                document.getElementById("dl").click();
-                setTimeout(function() {{
-                    window.parent.location.href = "/";
-                }}, 3000);
-            </script>
-            </body></html>
-            """
+            pdf_bytes = f.read()
+        st.download_button(
+            label="📄 Download Resume (PDF)",
+            data=pdf_bytes,
+            file_name="Jeron_Wong_Resume.pdf",
+            mime="application/pdf",
+            type="primary",
         )
     except FileNotFoundError:
         st.error("Resume file not found.")
+    st.page_link("app.py", label="← Back to portfolio")
 
 
 # ── Main Portfolio Page ──────────────────────────────────────────────────────
