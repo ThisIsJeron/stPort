@@ -28,6 +28,16 @@ SHARED_CSS = """
         gap: 1rem;
         margin-bottom: 1rem;
     }
+    @media (max-width: 768px) {
+        .card-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+    @media (min-width: 769px) and (max-width: 1024px) {
+        .card-grid {
+            grid-template-columns: repeat(2, 1fr);
+        }
+    }
     .card {
         background-color: #161B22;
         border: 1px solid #30363D;
