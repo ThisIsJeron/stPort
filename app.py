@@ -115,6 +115,10 @@ SIDEBAR_NAV_MD = """
 - [Resume](#resume)
 """
 
+def _anchor(id: str):
+    """Emit an invisible anchor element that sidebar links can target."""
+    st.markdown(f'<div id="{id}"></div>', unsafe_allow_html=True)
+
 # ── Lottie Helper ────────────────────────────────────────────────────────────
 
 LOTTIE_CODING_URL = "https://assets9.lottiefiles.com/packages/lf20_w51pcehl.json"
@@ -342,6 +346,7 @@ def main_page():
 
     # ── 2. Skills ────────────────────────────────────────────────────────────
 
+    _anchor("skills")
     st.markdown("## Skills")
 
     skill_categories = {
@@ -410,6 +415,7 @@ def main_page():
 
     # ── 3. About ─────────────────────────────────────────────────────────────
 
+    _anchor("about")
     st.markdown("## About")
     st.markdown(
         "DevOps / Platform Engineer with nearly a decade of experience building and scaling CI/CD pipelines, "
@@ -423,6 +429,7 @@ def main_page():
 
     # ── 4. Experience ────────────────────────────────────────────────────────
 
+    _anchor("experience")
     st.markdown("## Experience")
 
     experiences = [
@@ -483,6 +490,7 @@ def main_page():
 
     # ── 5. GitHub Repos ──────────────────────────────────────────────────────
 
+    _anchor("github-repos")
     st.markdown("## GitHub Repos")
 
     if top_repos:
@@ -510,6 +518,7 @@ def main_page():
 
     # ── 5b. GitHub Activity Chart ────────────────────────────────────────────
 
+    _anchor("github-activity")
     st.markdown("## GitHub Activity")
 
     activity_df = fetch_github_activity()
@@ -523,6 +532,7 @@ def main_page():
 
     # ── 6. Projects & Awards ─────────────────────────────────────────────────
 
+    _anchor("projects-awards")
     st.markdown("## Projects & Awards")
 
     # Build dialog functions once
@@ -552,6 +562,7 @@ def main_page():
 
     # ── 7. Education ─────────────────────────────────────────────────────────
 
+    _anchor("education")
     st.markdown("## Education")
     st.markdown("""
 <div class="card">
@@ -565,6 +576,7 @@ def main_page():
 
     # ── 8. Resume Download ───────────────────────────────────────────────────
 
+    _anchor("resume")
     st.markdown("## Resume")
 
     try:
